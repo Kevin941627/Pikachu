@@ -1,0 +1,267 @@
+=<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu de Exercícios - DS Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* Fontes Personalizadas */
+        .font-pixel { font-family: 'Press Start 2P', cursive; }
+        .font-retro { font-family: 'VT323', monospace; }
+
+        /* Estilização da Scrollbar para parecer retro */
+        .retro-scroll::-webkit-scrollbar {
+            width: 12px;
+        }
+        .retro-scroll::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+        .retro-scroll::-webkit-scrollbar-thumb {
+            background: #a0aec0;
+            border: 2px solid #2d3748;
+            border-radius: 0;
+        }
+
+        /* Efeito de Scanlines nas telas */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* Animação de brilho no hover dos links */
+        .ds-link:hover {
+            animation: pulse-border 1.5s infinite;
+        }
+        @keyframes pulse-border {
+            0% { border-color: #fbbf24; box-shadow: 0 0 5px #fbbf24; }
+            50% { border-color: #f59e0b; box-shadow: 0 0 15px #f59e0b; }
+            100% { border-color: #fbbf24; box-shadow: 0 0 5px #fbbf24; }
+        }
+
+        /* Corpo do DS - Gradiente Metálico */
+        .ds-shell {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 50%, #a0aec0 100%);
+            box-shadow: 
+                inset 2px 2px 5px rgba(255,255,255,0.8),
+                inset -2px -2px 5px rgba(0,0,0,0.2),
+                10px 10px 30px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-800 h-screen flex items-center justify-center overflow-hidden font-retro selection:bg-green-400 selection:text-black">
+
+    <!-- Container Principal do DS -->
+    <div id="ds-console" class="flex flex-col items-center max-w-lg w-full p-4 scale-90 sm:scale-100 transition-transform">
+        
+        <!-- PARTE SUPERIOR (Top Screen) -->
+        <div class="ds-shell w-full rounded-t-3xl rounded-b-lg p-6 pb-8 relative z-10">
+            <!-- Moldura da Tela -->
+            <div class="bg-gray-900 p-4 rounded-lg shadow-inner border-2 border-gray-400">
+                <!-- A Tela LCD -->
+                <div class="bg-sky-200 h-48 w-full rounded border-4 border-black relative overflow-hidden flex flex-col items-center justify-center shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]">
+                    <div class="scanlines absolute inset-0 z-10"></div>
+                    
+                    <!-- Conteúdo Tela Superior -->
+                    <div class="z-0 text-center space-y-2">
+                        <div class="text-xs font-pixel text-gray-600 mb-2" id="clock">12:00</div>
+                        <h1 class="text-2xl font-pixel text-blue-900 drop-shadow-md">Desafio CSS<br>Treinamento Pokémon</h1>
+                        <div class="mt-4 animate-bounce text-blue-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Indicadores de Bateria/Wifi (Decorativo) -->
+                    <div class="absolute top-1 right-2 flex space-x-1">
+                        <div class="w-3 h-3 bg-green-500 rounded-full border border-green-700"></div>
+                    </div>
+                </div>
+                <div class="text-center mt-1">
+                    <span class="text-gray-500 font-bold text-xs tracking-widest font-sans">NINTENDO</span>
+                </div>
+            </div>
+            
+            <!-- Alto-falantes -->
+            <div class="absolute top-1/2 left-2 transform -translate-y-1/2 space-y-1">
+                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
+                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
+                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
+            </div>
+            <div class="absolute top-1/2 right-2 transform -translate-y-1/2 space-y-1">
+                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
+                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
+                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- DOBRADIÇA (Hinge) -->
+        <div class="w-[95%] h-8 bg-gray-400 border-x-2 border-gray-500 flex justify-between items-center px-4 shadow-lg relative z-0 -my-2">
+            <div class="w-3 h-3 bg-gray-600 rounded-full shadow-inner"></div>
+            <div class="w-20 h-full bg-gray-300 border-x border-gray-500 opacity-50"></div>
+            <div class="w-3 h-3 bg-gray-600 rounded-full shadow-inner"></div>
+        </div>
+
+        <!-- PARTE INFERIOR (Bottom Screen & Controls) -->
+        <div class="ds-shell w-full rounded-b-3xl rounded-t-lg p-6 pt-8 relative z-10">
+            <div class="flex justify-between items-center">
+                
+                <!-- D-PAD (Esquerda) -->
+                <div class="w-24 h-24 relative flex-shrink-0 mr-2 hidden sm:block">
+                    <div class="absolute top-0 left-8 w-8 h-24 bg-gray-800 rounded shadow-md border-b-4 border-gray-900"></div> <!-- Vertical -->
+                    <div class="absolute top-8 left-0 w-24 h-8 bg-gray-800 rounded shadow-md border-b-4 border-gray-900"></div> <!-- Horizontal -->
+                    <div class="absolute top-9 left-9 w-6 h-6 bg-gray-700 rounded-full inset-shadow"></div> <!-- Center dip -->
+                    
+                    <!-- Setas decorativas -->
+                    <div class="absolute top-2 left-10 text-gray-600 text-xs">▲</div>
+                    <div class="absolute bottom-3 left-10 text-gray-600 text-xs">▼</div>
+                    <div class="absolute top-10 left-2 text-gray-600 text-xs">◀</div>
+                    <div class="absolute top-10 right-2 text-gray-600 text-xs">▶</div>
+                </div>
+
+                <!-- Tela Inferior (Touch Screen) -->
+                <div class="bg-gray-900 p-3 rounded-lg shadow-inner border-2 border-gray-400 w-full max-w-[300px] mx-auto">
+                    <div class="bg-gray-200 h-48 w-full border-4 border-gray-600 relative overflow-hidden shadow-[inset_0_0_15px_rgba(0,0,0,0.1)]">
+                         <div class="scanlines absolute inset-0 z-10"></div>
+                         
+                         <!-- Lista de Exercícios (Conteúdo Scrollável) -->
+                         <div class="h-full w-full overflow-y-auto p-2 retro-scroll relative z-20">
+                            <h2 class="text-center font-pixel text-[10px] text-gray-500 mb-2 border-b border-gray-400 pb-1">SELECIONAR EXERCÍCIO</h2>
+                            
+                            <ul class="space-y-2">
+                                <!-- Gerar links com JS ou HTML estático -->
+                                <li>
+                                    <a href="ex01.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">01</span>
+                                        <span class="text-gray-800 group-hover:text-black">Centralizar na Box</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex02.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">02</span>
+                                        <span class="text-gray-800 group-hover:text-black">Espaçar Igualmente</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex03.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">03</span>
+                                        <span class="text-gray-800 group-hover:text-black">Pokémon na Grama</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex04.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">04</span>
+                                        <span class="text-gray-800 group-hover:text-black"> Torre Pokémon</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex05.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">05</span>
+                                        <span class="text-gray-800 group-hover:text-black">O Gengar Fugitivo!</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex06.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">06</span>
+                                        <span class="text-gray-800 group-hover:text-black">Habitat 2x2</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex07.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">07</span>
+                                        <span class="text-gray-800 group-hover:text-black">O Snorlax Bloqueia a Passagem </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex08.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">08</span>
+                                        <span class="text-gray-800 group-hover:text-black"> A Videira do Oddish</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex09.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">09</span>
+                                        <span class="text-gray-800 group-hover:text-black">Alinhamento no Habitat</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="ex10.html" class="ds-link block bg-white border-2 border-gray-400 hover:border-yellow-400 hover:bg-yellow-50 p-2 text-lg leading-none cursor-pointer flex items-center group transition-all">
+                                        <span class="bg-blue-500 text-white text-xs px-1 mr-2 font-bold rounded group-hover:bg-yellow-500">10</span>
+                                        <span class="text-gray-800 group-hover:text-black">Posicionando os Lendários</span>
+                                    </a>
+                                </li>
+                            </ul>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Botões ABXY (Direita) -->
+                <div class="w-24 h-24 relative flex-shrink-0 ml-2 hidden sm:block">
+                    <!-- Botão X (Topo) -->
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center cursor-pointer active:border-b-0 active:translate-y-1 shadow-md">
+                        <span class="text-gray-500 text-xs font-bold font-sans">X</span>
+                    </div>
+                    <!-- Botão Y (Esquerda) -->
+                    <div class="absolute top-1/2 left-0 transform -translate-y-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center cursor-pointer active:border-b-0 active:translate-y-1 shadow-md">
+                        <span class="text-gray-500 text-xs font-bold font-sans">Y</span>
+                    </div>
+                    <!-- Botão A (Direita) -->
+                    <div class="absolute top-1/2 right-0 transform -translate-y-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center cursor-pointer active:border-b-0 active:translate-y-1 shadow-md">
+                        <span class="text-gray-500 text-xs font-bold font-sans">A</span>
+                    </div>
+                    <!-- Botão B (Baixo) -->
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center cursor-pointer active:border-b-0 active:translate-y-1 shadow-md">
+                        <span class="text-gray-500 text-xs font-bold font-sans">B</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Start / Select -->
+            <div class="flex justify-center space-x-4 mt-6">
+                <div class="text-center">
+                    <div class="w-12 h-3 bg-gray-400 rounded-full border border-gray-500 transform rotate-12 shadow-inner mb-1"></div>
+                    <span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider font-sans">Select</span>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-3 bg-gray-400 rounded-full border border-gray-500 transform rotate-12 shadow-inner mb-1"></div>
+                    <span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider font-sans">Start</span>
+                </div>
+            </div>
+            
+            <!-- Entrada de Fone de Ouvido -->
+             <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-2 bg-gray-900 rounded-t-lg opacity-50"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Relógio Simples para a Tela Superior
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+        }
+        
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Efeito sonoro simples ao clicar (Opcional, apenas visual feedback no console)
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                console.log('Link selecionado: ' + link.innerText);
+            });
+        });
+    </script>
+</body>
+</html>

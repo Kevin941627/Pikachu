@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercicio 9 - Justify Self</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        .font-pixel { font-family: 'Press Start 2P', cursive; }
+        .font-retro { font-family: 'VT323', monospace; }
+
+        /* Estilo da PC Box - Tema Noturno/Diurno misto */
+        .pc-box {
+            background-color: #1e293b; /* Fundo escuro */
+            /* Grade de fundo */
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            width: 100%;
+            height: 100%;
+            
+            /* GRID: 4 Colunas */
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr; 
+            /* Centraliza verticalmente para ficar bonito */
+            align-items: center; 
+            gap: 4px;
+            
+            padding: 10px;
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* Slots (Marcação visual das células do grid para ver o alinhamento) */
+        .grid-cell-guide {
+            border: 1px dashed rgba(255,255,255,0.2);
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .pokemon-card {
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            width: 60px; /* Tamanho fixo para ver o alinhamento na célula */
+            height: 60px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-size: 24px;
+        }
+
+        .pokemon-card:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .pokemon-name {
+            font-size: 6px;
+            font-family: 'Press Start 2P', cursive;
+            margin-top: 4px;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        /* Classes específicas do exercício */
+        
+        /* DIURNOS: Centralizar */
+        .day {
+            background-color: #fef3c7; /* Amarelo claro */
+            border: 2px solid #d97706;
+            /* SOLUÇÃO 1 */
+            justify-self: center;
+        }
+
+        /* NOTURNOS: Alinhar ao fim (direita) */
+        .night {
+            background-color: #312e81; /* Azul noturno */
+            border: 2px solid #818cf8;
+            color: white;
+            /* SOLUÇÃO 2 */
+            justify-self: end;
+        }
+        .night .pokemon-name { color: #e0e7ff; }
+
+        /* Cores específicas dos cards baseadas na imagem de referência */
+        #sentret { background-color: #fde68a; border-color: #d97706; }
+        #ledyba { background-color: #fbcfe8; border-color: #db2777; }
+        #hoothoot { background-color: #d4d4d8; border-color: #52525b; } /* Cinza/Marrom */
+        #spinarak { background-color: #86efac; border-color: #16a34a; }
+
+        /* Upload Image Styles */
+        .uploaded-img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            display: none;
+        }
+        .upload-icon { font-size: 10px; opacity: 0.5; position: absolute; top: 2px; right: 2px; color: inherit;}
+
+        .scanlines {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05));
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .ds-shell {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 50%, #a0aec0 100%);
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.8), inset -2px -2px 5px rgba(0,0,0,0.2), 10px 10px 30px rgba(0,0,0,0.5);
+        }
+
+        textarea {
+            resize: none;
+            outline: none;
+            font-family: 'VT323', monospace;
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+    </style>
+</head>
+<body class="bg-gray-800 h-screen flex items-center justify-center overflow-hidden font-retro selection:bg-purple-400 selection:text-white">
+
+    <div id="ds-console" class="flex flex-col items-center max-w-lg w-full p-4 scale-90 sm:scale-100 transition-transform">
+        
+        <!-- PARTE SUPERIOR (Visualização) -->
+        <div class="ds-shell w-full rounded-t-3xl rounded-b-lg p-6 pb-8 relative z-10">
+            <div class="bg-gray-900 p-4 rounded-lg shadow-inner border-2 border-gray-400">
+                <div class="bg-slate-800 h-48 w-full rounded border-4 border-black relative overflow-hidden flex flex-col shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+                    <div class="scanlines absolute inset-0 z-20 pointer-events-none"></div>
+                    
+
+                    <div class="absolute top-2 right-2 z-10 text-xs font-pixel text-green-400 animate-pulse" id="status-msg"></div>
+
+                    <!-- Grid Container -->
+                    <div id="pc-box-container" class="pc-box">
+                        <!-- Célula 1 -->
+                        <div class="relative w-full h-full flex items-center border border-dashed border-white/20">
+                            <div id="sentret" class="pokemon-card day" onclick="triggerUpload(this)" title="Sentret">
+                                <span class="upload-icon">+</span>
+                                <span class="emoji"><img src="img/ex09/Sentret.png" alt=""></span>
+                                <img src="" class="uploaded-img">
+                               
+                                                           </div>
+                        </div>
+
+                        <!-- Célula 2 -->
+                        <div class="relative w-full h-full flex items-center border border-dashed border-white/20">
+                            <div id="ledyba" class="pokemon-card day" onclick="triggerUpload(this)" title="Ledyba">
+                                <span class="upload-icon">+</span>
+                                <span class="emoji"><img src="img/ex09/Ledyba.png" alt=""></span>
+                                <img src="" class="uploaded-img">
+                                                                                          </div>
+                        </div>
+
+                        <!-- Célula 3 -->
+                        <div class="relative w-full h-full flex items-center border border-dashed border-white/20">
+                            <div id="hoothoot" class="pokemon-card night" onclick="triggerUpload(this)" title="Hoothoot">
+                                <span class="upload-icon">+</span>
+                                <span class="emoji"><img src="img/ex09/Hoothoot.png" alt=""></span>
+                                <img src="" class="uploaded-img">
+                                                          </div>
+                        </div>
+
+                        <!-- Célula 4 -->
+                        <div class="relative w-full h-full flex items-center border border-dashed border-white/20">
+                            <div id="spinarak" class="pokemon-card night" onclick="triggerUpload(this)" title="Spinarak">
+                                <span class="upload-icon">+</span>
+                                <span class="emoji"><img src="img/ex09/Spinarak.png" alt=""></span>
+                                <img src="" class="uploaded-img">
+                                                           </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-1">
+                    <span class="text-gray-500 font-bold text-xs tracking-widest font-sans">NINTENDO</span>
+                </div>
+            </div>
+            
+            <!-- Alto-falantes -->
+            <div class="absolute top-1/2 left-2 transform -translate-y-1/2 space-y-1"><div class="w-1 h-1 bg-gray-500 rounded-full"></div><div class="w-1 h-1 bg-gray-500 rounded-full"></div><div class="w-1 h-1 bg-gray-500 rounded-full"></div></div>
+            <div class="absolute top-1/2 right-2 transform -translate-y-1/2 space-y-1"><div class="w-1 h-1 bg-gray-500 rounded-full"></div><div class="w-1 h-1 bg-gray-500 rounded-full"></div><div class="w-1 h-1 bg-gray-500 rounded-full"></div></div>
+        </div>
+
+        <!-- DOBRADIÇA -->
+        <div class="w-[95%] h-8 bg-gray-400 border-x-2 border-gray-500 flex justify-between items-center px-4 shadow-lg relative z-0 -my-2">
+            <div class="w-3 h-3 bg-gray-600 rounded-full shadow-inner"></div>
+            <div class="w-20 h-full bg-gray-300 border-x border-gray-500 opacity-50"></div>
+            <div class="w-3 h-3 bg-gray-600 rounded-full shadow-inner"></div>
+        </div>
+
+        <!-- PARTE INFERIOR (Editor) -->
+        <div class="ds-shell w-full rounded-b-3xl rounded-t-lg p-6 pt-8 relative z-10">
+            <div class="flex justify-between items-center">
+                
+                <!-- D-PAD -->
+                <div class="w-24 h-24 relative flex-shrink-0 mr-2 hidden sm:block">
+                    <div class="absolute top-0 left-8 w-8 h-24 bg-gray-800 rounded shadow-md border-b-4 border-gray-900"></div>
+                    <div class="absolute top-8 left-0 w-24 h-8 bg-gray-800 rounded shadow-md border-b-4 border-gray-900"></div>
+                    <div class="absolute top-9 left-9 w-6 h-6 bg-gray-700 rounded-full inset-shadow"></div>
+                    <a href="index.html" class="absolute top-8 left-0 w-8 h-8 z-20 cursor-pointer" title="Voltar ao Menu"></a>
+                </div>
+
+                <!-- Tela de Código -->
+                <div class="bg-gray-900 p-3 rounded-lg shadow-inner border-2 border-gray-400 w-full max-w-[300px] mx-auto">
+                    <div class="bg-gray-800 h-48 w-full border-4 border-gray-600 relative overflow-hidden shadow-[inset_0_0_15px_rgba(0,0,0,0.1)] flex flex-col">
+                        
+                        <!-- Header do Editor -->
+                        <div class="bg-gray-700 text-white px-2 py-1 text-xs flex justify-between items-center font-pixel">
+                            <span>Exercício 9</span>
+                            <span class="text-purple-400 text-[8px]"></span>
+                        </div>
+
+                        
+                            
+                            
+
+                        <!-- Botão Executar -->
+                        <button onclick="runCode()" class="bg-purple-600 hover:bg-purple-500 text-white font-pixel text-[10px] py-2 w-full border-t border-gray-600 active:bg-purple-700 transition-colors">
+                            Alinhamento no Habitat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="w-24 h-24 relative flex-shrink-0 ml-2 hidden sm:block">
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center shadow-md"><span class="text-gray-500 text-xs font-bold font-sans">X</span></div>
+                    <div class="absolute top-1/2 left-0 transform -translate-y-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center shadow-md"><span class="text-gray-500 text-xs font-bold font-sans">Y</span></div>
+                    <div onclick="runCode()" class="cursor-pointer active:translate-y-1 active:border-b-0 absolute top-1/2 right-0 transform -translate-y-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center shadow-md"><span class="text-gray-500 text-xs font-bold font-sans">A</span></div>
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center shadow-md"><span class="text-gray-500 text-xs font-bold font-sans"><a href="index.html">B</a></span></div>
+                </div>
+            </div>
+
+             <div class="flex justify-center space-x-4 mt-6">
+                <div class="text-center"><div class="w-12 h-3 bg-gray-400 rounded-full border border-gray-500 transform rotate-12 shadow-inner mb-1"></div><span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider font-sans">Select</span></div>
+                <div class="text-center"><div class="w-12 h-3 bg-gray-400 rounded-full border border-gray-500 transform rotate-12 shadow-inner mb-1"></div><span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider font-sans">Start</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function triggerUpload(card) {
+            const input = card.querySelector('input[type="file"]');
+            input.click();
+        }
+
+        function previewImage(input, event) {
+            event.stopPropagation();
+            const card = input.parentElement;
+            const file = input.files[0];
+            const img = card.querySelector('.uploaded-img');
+            const emoji = card.querySelector('.emoji');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    if(emoji) emoji.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function runCode() {
+            const inputDay = document.getElementById('css-input-day').value.toLowerCase();
+            const inputNight = document.getElementById('css-input-night').value.toLowerCase();
+            const dayCards = document.querySelectorAll('.day');
+            const nightCards = document.querySelectorAll('.night');
+            const status = document.getElementById('status-msg');
+
+            // Reset Styles
+            dayCards.forEach(card => card.style.justifySelf = 'auto');
+            nightCards.forEach(card => card.style.justifySelf = 'auto');
+
+            // Aplicar Day (Sentret/Ledyba)
+            if (inputDay.includes('justify-self')) {
+                const match = inputDay.match(/justify-self:\s*([^;]+)/);
+                if (match && match[1]) {
+                    const val = match[1].trim();
+                    dayCards.forEach(card => card.style.justifySelf = val);
+                }
+            }
+
+            // Aplicar Night (Hoothoot/Spinarak)
+            if (inputNight.includes('justify-self')) {
+                const match = inputNight.match(/justify-self:\s*([^;]+)/);
+                if (match && match[1]) {
+                    const val = match[1].trim();
+                    nightCards.forEach(card => card.style.justifySelf = val);
+                }
+            }
+
+            // Verificação
+            const dayCorrect = inputDay.includes('center');
+            const nightCorrect = inputNight.includes('end') || inputNight.includes('right');
+
+            if (dayCorrect && nightCorrect) {
+                status.textContent = 'ALIGNED!';
+                status.className = 'absolute top-2 right-2 z-10 text-xs font-pixel text-green-400 animate-pulse';
+                playSound('success');
+            } else {
+                status.textContent = 'TRY AGAIN';
+                status.className = 'absolute top-2 right-2 z-10 text-xs font-pixel text-yellow-600';
+            }
+        }
+
+        function playSound(type) {
+            console.log("Playing sound:", type);
+        }
+    </script>
+</body>
+</html>

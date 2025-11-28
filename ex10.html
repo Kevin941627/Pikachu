@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercicio 10 - Legendary Grid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        .font-pixel { font-family: 'Press Start 2P', cursive; }
+        .font-retro { font-family: 'VT323', monospace; }
+
+        /* Estilo da PC Box - Grid 3x3 */
+        .pc-box {
+            background-color: #0f172a; /* Fundo Cósmico/Escuro */
+            /* Efeito de estrelas/grade */
+            background-image: 
+                radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            width: 100%;
+            height: 100%;
+            
+            /* GRID 3x3 EXPLÍCITO */
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 8px;
+            
+            padding: 12px;
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* Guias visuais das células do grid para facilitar a visualização */
+        .grid-guide {
+            position: absolute;
+            inset: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .grid-cell {
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .pokemon-card {
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            z-index: 5;
+            background-color: rgba(255,255,255,0.1);
+            backdrop-filter: blur(4px);
+        }
+
+        .pokemon-card:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Estilos Específicos */
+        .card-articuno { 
+            border-color: #0ea5e9;
+            background: linear-gradient(135deg, rgba(224, 242, 254, 0.9) 0%, rgba(125, 211, 252, 0.9) 100%);
+            /* SOLUÇÃO APLICADA: Linha 1, Coluna 1 */
+            grid-row: 1;
+            grid-column: 1;
+        }
+        
+        .card-zapdos { 
+            border-color: #eab308;
+            background: linear-gradient(135deg, rgba(254, 249, 195, 0.9) 0%, rgba(253, 224, 71, 0.9) 100%);
+            /* SOLUÇÃO APLICADA: Linha 2, Coluna 2 */
+            grid-row: 2;
+            grid-column: 2;
+        }
+        
+        .card-moltres { 
+            border-color: #ea580c;
+            background: linear-gradient(135deg, rgba(255, 237, 213, 0.9) 0%, rgba(253, 186, 116, 0.9) 100%);
+            /* SOLUÇÃO APLICADA: Linha 3, Coluna 3 */
+            grid-row: 3;
+            grid-column: 3;
+        }
+
+        .card-name {
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: 'Press Start 2P', cursive;
+            margin-top: 4px;
+            color: rgba(0,0,0,0.7);
+        }
+
+        .sprite {
+            width: 56px;
+            height: 56px;
+            image-rendering: pixelated;
+            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.2));
+            object-fit: contain;
+        }
+
+        .uploaded-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        /* Scanlines */
+        .scanlines {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05));
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .ds-shell {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 50%, #a0aec0 100%);
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.8), inset -2px -2px 5px rgba(0,0,0,0.2), 10px 10px 30px rgba(0,0,0,0.5);
+        }
+
+        textarea {
+            resize: none;
+            outline: none;
+            font-family: 'VT323', monospace;
+            font-size: 1rem;
+            line-height: 1.1;
+        }
+        
+        .input-scroll::-webkit-scrollbar { width: 4px; }
+        .input-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-gray-800 h-screen flex items-center justify-center overflow-hidden font-retro selection:bg-purple-400 selection:text-white">
+
+    <div id="ds-console" class="flex flex-col items-center max-w-lg w-full p-4 scale-90 sm:scale-100 transition-transform">
+        
+        <!-- PARTE SUPERIOR (Visualização) -->
+        <div class="ds-shell w-full rounded-t-3xl rounded-b-lg p-6 pb-8 relative z-10">
+            <div class="bg-gray-900 p-4 rounded-lg shadow-inner border-2 border-gray-400">
+                <div class="bg-slate-900 h-48 w-full rounded border-4 border-black relative overflow-hidden flex flex-col shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+                    <div class="scanlines absolute inset-0 z-20 pointer-events-none"></div>
+                    
+                    
+                    <div class="absolute top-2 right-2 z-10 text-xs font-pixel text-yellow-400 animate-pulse" id="status-msg"></div>
+
+                    <!-- Guias do Grid (Fundo) -->
+                    <div class="grid-guide">
+                        <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                        <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                        <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                    </div>
+
+                    <!-- Grid Container -->
+                    <div id="pc-box-container" class="pc-box">
+                        
+                        <!-- Articuno -->
+                        <div id="articuno" class="pokemon-card card-articuno" onclick="triggerUpload(this)" title="Articuno (1,1)">
+                            <img src="img/ex10/Articuno.png" class="sprite">
+                            <img src="" class="uploaded-img">
+                            
+                        </div>
+
+                        <!-- Zapdos -->
+                        <div id="zapdos" class="pokemon-card card-zapdos" onclick="triggerUpload(this)" title="Zapdos (2,2)">
+                            <img src="img/ex10/Zapdos.png" class="sprite">
+                            <img src="" class="uploaded-img">
+                           
+                        </div>
+
+                        <!-- Moltres -->
+                        <div id="moltres" class="pokemon-card card-moltres" onclick="triggerUpload(this)" title="Moltres (3,3)">
+                            <img src="img/ex10/Moltres.png" class="sprite">
+                            <img src="" class="uploaded-img">
+                            
+                        </div>
+
+                    </div>
+                </div>
+                <div class="text-center mt-1">
+                    <span class="text-gray-500 font-bold text-xs tracking-widest font-sans">NINTENDO</span>
+                </div>
+            </div>
+            
+            <!-- Alto-falantes -->
+            <div class="absolute top-1/2 left-2 transform -translate-y-1/2 space-y-1"><div class="w-1 h-1 bg-gray-500 rounded-full"></div><div class="w-1 h-1 bg-gray-500 rounded-full"></div><div class="w-1 h-1 bg-gray-500 rounded-full"></div></div>
+            <div class="absolute top-1/2 right-2 transform -translate-y-1/2 space-y-1"><div class="w-1 h-1 bg-gray-500 rounded-full"></div><div class="w-1 h-1 bg-gray-500 rounded-full"></div><div class="w-1 h-1 bg-gray-500 rounded-full"></div></div>
+        </div>
+
+        <!-- DOBRADIÇA -->
+        <div class="w-[95%] h-8 bg-gray-400 border-x-2 border-gray-500 flex justify-between items-center px-4 shadow-lg relative z-0 -my-2">
+            <div class="w-3 h-3 bg-gray-600 rounded-full shadow-inner"></div>
+            <div class="w-20 h-full bg-gray-300 border-x border-gray-500 opacity-50"></div>
+            <div class="w-3 h-3 bg-gray-600 rounded-full shadow-inner"></div>
+        </div>
+
+        <!-- PARTE INFERIOR (Editor) -->
+        <div class="ds-shell w-full rounded-b-3xl rounded-t-lg p-6 pt-8 relative z-10">
+            <div class="flex justify-between items-center">
+                
+                <!-- D-PAD -->
+                <div class="w-24 h-24 relative flex-shrink-0 mr-2 hidden sm:block">
+                    <div class="absolute top-0 left-8 w-8 h-24 bg-gray-800 rounded shadow-md border-b-4 border-gray-900"></div>
+                    <div class="absolute top-8 left-0 w-24 h-8 bg-gray-800 rounded shadow-md border-b-4 border-gray-900"></div>
+                    <div class="absolute top-9 left-9 w-6 h-6 bg-gray-700 rounded-full inset-shadow"></div>
+                    <a href="index.html" class="absolute top-8 left-0 w-8 h-8 z-20 cursor-pointer" title="Voltar ao Menu"></a>
+                </div>
+
+                <!-- Tela de Código -->
+                <div class="bg-gray-900 p-3 rounded-lg shadow-inner border-2 border-gray-400 w-full max-w-[300px] mx-auto">
+                    <div class="bg-gray-800 h-48 w-full border-4 border-gray-600 relative overflow-hidden shadow-[inset_0_0_15px_rgba(0,0,0,0.1)] flex flex-col">
+                        
+                        <!-- Header do Editor -->
+                        <div class="bg-gray-700 text-white px-2 py-1 text-xs flex justify-between items-center font-pixel">
+                            <span>Exercício 10</span>
+                            <span class="text-purple-400 text-[8px]"></span>
+                        </div>
+
+                      
+                            
+                          
+
+                        <!-- Botão Executar -->
+                        <button onclick="runCode()" class="bg-purple-600 hover:bg-purple-500 text-white font-pixel text-[10px] py-2 w-full border-t border-gray-600 active:bg-purple-700 transition-colors">
+                            Posicionando os Lendários
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="w-24 h-24 relative flex-shrink-0 ml-2 hidden sm:block">
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center shadow-md"><span class="text-gray-500 text-xs font-bold font-sans">X</span></div>
+                    <div class="absolute top-1/2 left-0 transform -translate-y-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center shadow-md"><span class="text-gray-500 text-xs font-bold font-sans">Y</span></div>
+                    <div onclick="runCode()" class="cursor-pointer active:translate-y-1 active:border-b-0 absolute top-1/2 right-0 transform -translate-y-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center shadow-md"><span class="text-gray-500 text-xs font-bold font-sans">A</span></div>
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gray-300 rounded-full border-b-4 border-gray-400 flex items-center justify-center shadow-md"><span class="text-gray-500 text-xs font-bold font-sans"><a href="index.html">B</a></span></div>
+                </div>
+            </div>
+
+             <div class="flex justify-center space-x-4 mt-6">
+                <div class="text-center"><div class="w-12 h-3 bg-gray-400 rounded-full border border-gray-500 transform rotate-12 shadow-inner mb-1"></div><span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider font-sans">Select</span></div>
+                <div class="text-center"><div class="w-12 h-3 bg-gray-400 rounded-full border border-gray-500 transform rotate-12 shadow-inner mb-1"></div><span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider font-sans">Start</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function triggerUpload(card) {
+            const input = card.querySelector('input[type="file"]');
+            input.click();
+        }
+
+        function previewImage(input, event) {
+            event.stopPropagation();
+            const card = input.parentElement;
+            const file = input.files[0];
+            const img = card.querySelector('.uploaded-img');
+            const sprite = card.querySelector('.sprite');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    if(sprite) sprite.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function extractStyles(cssString) {
+            const rowMatch = cssString.match(/grid-row:\s*([^;]+)/);
+            const colMatch = cssString.match(/grid-column:\s*([^;]+)/);
+            return {
+                row: rowMatch ? rowMatch[1].trim() : '',
+                col: colMatch ? colMatch[1].trim() : ''
+            };
+        }
+
+        function runCode() {
+            const valArticuno = document.getElementById('input-articuno').value.toLowerCase();
+            const valZapdos = document.getElementById('input-zapdos').value.toLowerCase();
+            const valMoltres = document.getElementById('input-moltres').value.toLowerCase();
+            
+            const cardArticuno = document.getElementById('articuno');
+            const cardZapdos = document.getElementById('zapdos');
+            const cardMoltres = document.getElementById('moltres');
+            const status = document.getElementById('status-msg');
+
+            // Reset Styles
+            cardArticuno.style.gridRow = ''; cardArticuno.style.gridColumn = '';
+            cardZapdos.style.gridRow = ''; cardZapdos.style.gridColumn = '';
+            cardMoltres.style.gridRow = ''; cardMoltres.style.gridColumn = '';
+
+            // Apply Styles
+            const stylesA = extractStyles(valArticuno);
+            if (stylesA.row) cardArticuno.style.gridRow = stylesA.row;
+            if (stylesA.col) cardArticuno.style.gridColumn = stylesA.col;
+
+            const stylesZ = extractStyles(valZapdos);
+            if (stylesZ.row) cardZapdos.style.gridRow = stylesZ.row;
+            if (stylesZ.col) cardZapdos.style.gridColumn = stylesZ.col;
+
+            const stylesM = extractStyles(valMoltres);
+            if (stylesM.row) cardMoltres.style.gridRow = stylesM.row;
+            if (stylesM.col) cardMoltres.style.gridColumn = stylesM.col;
+
+            // Check Success
+            const okA = (stylesA.row === '1' || stylesA.row.includes('1 / 2')) && (stylesA.col === '1' || stylesA.col.includes('1 / 2'));
+            const okZ = (stylesZ.row === '2' || stylesZ.row.includes('2 / 3')) && (stylesZ.col === '2' || stylesZ.col.includes('2 / 3'));
+            const okM = (stylesM.row === '3' || stylesM.row.includes('3 / 4')) && (stylesM.col === '3' || stylesM.col.includes('3 / 4'));
+
+            if (okA && okZ && okM) {
+                status.textContent = 'LEGENDS PLACED!';
+                status.className = 'absolute top-2 right-2 z-10 text-xs font-pixel text-green-400 animate-pulse';
+                playSound('success');
+            } else {
+                status.textContent = 'TRY AGAIN';
+                status.className = 'absolute top-2 right-2 z-10 text-xs font-pixel text-yellow-600';
+            }
+        }
+
+        function playSound(type) {
+            console.log("Playing sound:", type);
+        }
+
+        document.querySelectorAll('textarea').forEach(area => {
+            area.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    runCode();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
